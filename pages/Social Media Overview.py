@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
 # Load the CSV file
-file_path = r"/workspaces/st_volt/data/all_content.csv"
-data = pd.read_csv(file_path)
+
+data = pd.read_csv("pages/data/all_content.csv")
 
 # Ensure column names are consistent
 data.columns = data.columns.str.strip()
