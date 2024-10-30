@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
 # Load the CSV file
-file_path = r"C:\Users\phil1\Downloads\final_insta_euwahl.csv"
+file_path = r"data\final_insta_euwahl.csv"
 data = pd.read_csv(file_path)
 
 # Ensure column names are consistent

@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load the new CSV file
-new_data = pd.read_csv(r"C:\Users\phil1\OneDrive\Volt\Data\Digital Ads\all_meta_ads.csv")
+new_data = pd.read_csv(r"data\all_meta_ads.csv")
 
 # Preprocess the new data
 new_data.columns = new_data.columns.str.strip()
