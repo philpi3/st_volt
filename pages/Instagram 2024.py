@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
+st.set_page_config(layout="wide")
+
 # Load the CSV file
 
 data = pd.read_csv("pages/data/final_insta_euwahl.csv")
