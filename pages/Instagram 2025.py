@@ -13,7 +13,7 @@ data.columns = data.columns.str.strip()
 # Preprocess data: convert strings with commas to numeric
 data['Anzahl Likes'] = data['Anzahl Likes'].str.replace(',', '').astype(float)
 data['Anzahl Kommentare'] = data['Anzahl Kommentare'].str.replace(',', '').astype(float)
-data['Gesamtanzahl Reaktionen, Kommentare & Shares'] = data['Gesamtanzahl Reaktionen, Kommentare & Shares'].str.replace(',', '').astype(float)
+data['Reaktionen, Kommentare & Shares'] = data['Reaktionen, Kommentare & Shares'].str.replace(',', '').astype(float)
 
 # Convert 'Datum' to datetime
 data['Datum'] = pd.to_datetime(data['Datum'], format='%d.%m.%y %H:%M', errors='coerce')
@@ -132,7 +132,7 @@ with col3:
         # Make a copy to avoid modifying the original DataFrame
         temp_data = filtered_data.copy()
         temp_data.set_index('Datum', inplace=True)
-        st.line_chart(temp_data['Gesamtanzahl Reaktionen, Kommentare & Shares'])
+        st.line_chart(temp_data['Reaktionen, Kommentare & Shares'])
 
 # Show interaction rate over time in the second column
 with col4:
@@ -151,7 +151,7 @@ sentiment_counts = filtered_data['sentiment'].value_counts()
 st.bar_chart(sentiment_counts)
 
 # Ensure the columns for aggregation are numeric
-numeric_columns = ['Anzahl Likes', 'Anzahl Kommentare', 'Gesamtanzahl Reaktionen, Kommentare & Shares']
+numeric_columns = ['Anzahl Likes', 'Anzahl Kommentare', 'Reaktionen, Kommentare & Shares']
 numeric_data = filtered_data[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
 # Adding sentiment back to numeric data for grouping
