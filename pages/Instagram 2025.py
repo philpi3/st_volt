@@ -16,6 +16,8 @@ data['Anzahl Kommentare'] = data['Anzahl Kommentare'].str.replace(',', '').astyp
 data['Reaktionen, Kommentare & Shares'] = data['Reaktionen, Kommentare & Shares'].str.replace(',', '').astype(float)
 
 # Convert 'Datum' to datetime
+data['Datum'] = data['Datum'].str.replace(',', ' ')
+
 data['Datum'] = pd.to_datetime(data['Datum'], format='%d.%m.%y %H:%M', errors='coerce')
 
 # Streamlit app title
