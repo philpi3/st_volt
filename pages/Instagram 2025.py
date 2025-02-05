@@ -156,7 +156,8 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         st.markdown(
             f"""
             ### Zusammenfassung:
-            Dieses Textfeld zeigt automatisch die best performenden Sentimente, Emotionen und Politikfelder in der über die Filter auf der Seitenleiste ausgewählten Gruppen / Parteien.
+            Die folgenden Textfelder zeigen automatisch die best performenden Sentimente, Emotionen und Politikfelder in der über die Filter auf der Seitenleiste ausgewählten Gruppen / Parteien. 
+            Danach folgen jeweils die drei Posts mit der höchsten Interaktionsrate in den jeweiligen Kategorien. Für einen kompletten Überblick, über die Posts in der gefilterten Gruppe, können die generierten Tabellen weiter unten genutzt werden.
             - **Sentiment:** {best_sentiment} (Avg. Interaction Rate: {best_sentiment_rate:.2f})
             - **Emotion:** {best_emotion} (Avg. Interaction Rate: {best_emotion_rate:.2f})
             - **Politikfeld:** {best_politikfeld} (Avg. Interaction Rate: {best_politikfeld_rate:.2f})
@@ -170,12 +171,12 @@ else:
 
 #TEST2
 # Display a header for example posts
-st.subheader("Example Posts from Best Performing Categories")
+st.subheader("Beispiel Posts aus den best performenden Kategorien:")
 
 # Ensure that the performance metric is numeric and available
 if 'Post-Interaktionsrate' in filtered_data.columns:
     # For the best sentiment:
-    st.markdown(f"**Top posts for sentiment '{best_sentiment}':**")
+    st.markdown(f"**Top posts für Sentiment '{best_sentiment}':**")
     # Filter the posts in the best sentiment and sort them by the interaction rate descending
     top_sentiment_posts = filtered_data[filtered_data['sentiment'] == best_sentiment].sort_values(
         by='Post-Interaktionsrate', ascending=False
@@ -189,7 +190,7 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         st.write("No posts found for this sentiment.")
 
     # For the best emotion:
-    st.markdown(f"**Top posts for emotion '{best_emotion}':**")
+    st.markdown(f"**Top posts für Emotion '{best_emotion}':**")
     top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion].sort_values(
         by='Post-Interaktionsrate', ascending=False
     ).head(3)
@@ -202,7 +203,7 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         st.write("No posts found for this emotion.")
 
     # For the best politikfeld:
-    st.markdown(f"**Top posts for politikfeld '{best_politikfeld}':**")
+    st.markdown(f"**Top posts für Politikfeld '{best_politikfeld}':**")
     top_politikfeld_posts = filtered_data[filtered_data['politikfeld'] == best_politikfeld].sort_values(
         by='Post-Interaktionsrate', ascending=False
     ).head(3)
