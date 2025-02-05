@@ -7,7 +7,7 @@ st.set_page_config(layout="wide")
 
 # Load the CSV file
 
-data = pd.read_csv("pages/data/total_results_Jan25.csv")
+data = pd.read_csv("pages\data\Jan25-04.02.csv")
 
 # Ensure column names are consistent
 data.columns = data.columns.str.strip()
