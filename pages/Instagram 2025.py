@@ -170,54 +170,55 @@ else:
 #TEST ABOVE
 
 #TEST2
-# Display a header for example posts
-st.subheader("Beispiel Posts aus den best performenden Kategorien:")
+# First, compute and clean the best-performing categories as before
+# (Assuming best_sentiment, best_emotion, best_politikfeld have been computed,
+#  and that filtered_data has been cleaned accordingly)
 
-# Ensure that the performance metric is numeric and available
+# For example, ensure that 'Post-Interaktionsrate' is numeric:
 if 'Post-Interaktionsrate' in filtered_data.columns:
-    # For the best sentiment:
-    st.markdown(f"**Top posts für Sentiment '{best_sentiment}':**")
-    # Filter the posts in the best sentiment and sort them by the interaction rate descending
-    top_sentiment_posts = filtered_data[filtered_data['sentiment'] == best_sentiment].sort_values(
-        by='Post-Interaktionsrate', ascending=False
-    ).head(3)
+    filtered_data['Post-Interaktionsrate'] = pd.to_numeric(filtered_data['Post-Interaktionsrate'], errors='coerce')
+
+# Compute the top posts for each category
+top_sentiment_posts = filtered_data[filtered_data['sentiment'] == best_sentiment] \
+    .sort_values(by='Post-Interaktionsrate', ascending=False).head(3)
+top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion] \
+    .sort_values(by='Post-Interaktionsrate', ascending=False).head(3)
+top_politikfeld_posts = filtered_data[filtered_data['politikfeld'] == best_politikfeld] \
+    .sort_values(by='Post-Interaktionsrate', ascending=False).head(3)
+
+# Create three columns to display the posts side by side
+cols = st.columns(3)
+
+with cols[0]:
+    st.markdown(f"### Top posts for sentiment '{best_sentiment}'")
     if not top_sentiment_posts.empty:
         for _, row in top_sentiment_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
             st.write(row['Text'])
-            
+            st.write("---")
     else:
         st.write("No posts found for this sentiment.")
-    st.write("---")
-    # For the best emotion:
-    st.markdown(f"**Top posts für Emotion '{best_emotion}':**")
-    top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion].sort_values(
-        by='Post-Interaktionsrate', ascending=False
-    ).head(3)
+
+with cols[1]:
+    st.markdown(f"### Top posts for emotion '{best_emotion}'")
     if not top_emotion_posts.empty:
         for _, row in top_emotion_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
             st.write(row['Text'])
-            
+            st.write("---")
     else:
         st.write("No posts found for this emotion.")
-    st.write("---")
 
-    # For the best politikfeld:
-    st.markdown(f"**Top posts für Politikfeld '{best_politikfeld}':**")
-    top_politikfeld_posts = filtered_data[filtered_data['politikfeld'] == best_politikfeld].sort_values(
-        by='Post-Interaktionsrate', ascending=False
-    ).head(3)
+with cols[2]:
+    st.markdown(f"### Top posts for politikfeld '{best_politikfeld}'")
     if not top_politikfeld_posts.empty:
         for _, row in top_politikfeld_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
             st.write(row['Text'])
-            
+            st.write("---")
     else:
         st.write("No posts found for this politikfeld.")
-    st.write("---")
-else:
-    st.info("The 'Post-Interaktionsrate' column is missing, so example posts cannot be shown.")
+
 #END TEST2
 
 # Debugging: Show the count of filtered rows
