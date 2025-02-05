@@ -95,36 +95,71 @@ if phrase:
     filtered_data = filtered_data[filtered_data['Text'].str.contains(phrase, case=False, na=False)]
 
 #TEST BELOW
-# Convert 'Post-Interaktionsrate' to numeric, forcing non-numeric values to become NaN
+# Ensure that 'Post-Interaktionsrate' is numeric
 if 'Post-Interaktionsrate' in filtered_data.columns:
+    # If there is a percent sign or similar formatting, remove it first:
+    # filtered_data['Post-Interaktionsrate'] = filtered_data['Post-Interaktionsrate'].str.rstrip('%')
     filtered_data['Post-Interaktionsrate'] = pd.to_numeric(filtered_data['Post-Interaktionsrate'], errors='coerce')
+    
+    # Calculate the average interaction rate per category
+    sentiment_perf = filtered_data.groupby('sentiment')['Post-Interaktionsrate'].mean()
+    emotion_perf = filtered_data.groupby('emotion')['Post-Interaktionsrate'].mean()
+    politikfeld_perf = filtered_data.groupby('politikfeld')['Post-Interaktionsrate'].mean()
 
-# Determine best performing sentiment, emotion, and politikfeld based on average post interaction rate
-if not filtered_data.empty:
-    if 'Post-Interaktionsrate' in filtered_data.columns:
-        # Calculate the average interaction rate per category
-        sentiment_perf = filtered_data.groupby('sentiment')['Post-Interaktionsrate'].mean()
-        emotion_perf = filtered_data.groupby('emotion')['Post-Interaktionsrate'].mean()
-        politikfeld_perf = filtered_data.groupby('politikfeld')['Post-Interaktionsrate'].mean()
+    # Debug: print the indexes so we can see what keys are available
+    st.write("Sentiment groups:", sentiment_perf.index.tolist())
+    st.write("Emotion groups:", emotion_perf.index.tolist())
+    st.write("Politikfeld groups:", politikfeld_perf.index.tolist())
 
-        # Identify the best performing category for each type
-        best_sentiment = sentiment_perf.idxmax()
-        best_emotion = emotion_perf.idxmax()
-        best_politikfeld = politikfeld_perf.idxmax()
+    # Check if the series are non-empty before proceeding
+    if not sentiment_perf.empty and not emotion_perf.empty and not politikfeld_perf.empty:
+        try:
+            best_sentiment = sentiment_perf.idxmax()
+            # Check that the key exists before indexing
+            if best_sentiment in sentiment_perf.index:
+                best_sentiment_rate = sentiment_perf.loc[best_sentiment]
+            else:
+                best_sentiment_rate = float('nan')
+        except Exception as e:
+            best_sentiment = "N/A"
+            best_sentiment_rate = 0
+            st.error(f"Error determining best sentiment: {e}")
+
+        try:
+            best_emotion = emotion_perf.idxmax()
+            if best_emotion in emotion_perf.index:
+                best_emotion_rate = emotion_perf.loc[best_emotion]
+            else:
+                best_emotion_rate = float('nan')
+        except Exception as e:
+            best_emotion = "N/A"
+            best_emotion_rate = 0
+            st.error(f"Error determining best emotion: {e}")
+
+        try:
+            best_politikfeld = politikfeld_perf.idxmax()
+            if best_politikfeld in politikfeld_perf.index:
+                best_politikfeld_rate = politikfeld_perf.loc[best_politikfeld]
+            else:
+                best_politikfeld_rate = float('nan')
+        except Exception as e:
+            best_politikfeld = "N/A"
+            best_politikfeld_rate = 0
+            st.error(f"Error determining best politikfeld: {e}")
 
         st.markdown(
             f"""
             ### Best Performing Categories
-            - **Sentiment:** {best_sentiment} (Avg. Interaction Rate: {sentiment_perf[best_sentiment]:.2f})
-            - **Emotion:** {best_emotion} (Avg. Interaction Rate: {emotion_perf[best_emotion]:.2f})
-            - **Politikfeld:** {best_politikfeld} (Avg. Interaction Rate: {politikfeld_perf[best_politikfeld]:.2f})
+            - **Sentiment:** {best_sentiment} (Avg. Interaction Rate: {best_sentiment_rate:.2f})
+            - **Emotion:** {best_emotion} (Avg. Interaction Rate: {best_emotion_rate:.2f})
+            - **Politikfeld:** {best_politikfeld} (Avg. Interaction Rate: {best_politikfeld_rate:.2f})
             """
         )
     else:
-        st.info("The 'Post-Interaktionsrate' column is not available to calculate performance metrics.")
+        st.info("Not enough data to compute performance metrics for one or more categories.")
 else:
-    st.info("No data available for the selected filters.")
-#TEST ABOVE
+    st.info("The 'Post-Interaktionsrate' column is not available to calculate performance metrics.")
+
 
 # Debugging: Show the count of filtered rows
 st.write("Number of rows after filtering:", len(filtered_data))
