@@ -166,7 +166,56 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         st.info("Not enough data to compute performance metrics for one or more categories.")
 else:
     st.info("The 'Post-Interaktionsrate' column is not available to calculate performance metrics.")
+#TEST ABOVE
 
+#TEST2
+# Display a header for example posts
+st.subheader("Example Posts from Best Performing Categories")
+
+# Ensure that the performance metric is numeric and available
+if 'Post-Interaktionsrate' in filtered_data.columns:
+    # For the best sentiment:
+    st.markdown(f"**Top posts for sentiment '{best_sentiment}':**")
+    # Filter the posts in the best sentiment and sort them by the interaction rate descending
+    top_sentiment_posts = filtered_data[filtered_data['sentiment'] == best_sentiment].sort_values(
+        by='Post-Interaktionsrate', ascending=False
+    ).head(3)
+    if not top_sentiment_posts.empty:
+        for _, row in top_sentiment_posts.iterrows():
+            st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
+            st.write(row['Text'])
+            st.write("---")
+    else:
+        st.write("No posts found for this sentiment.")
+
+    # For the best emotion:
+    st.markdown(f"**Top posts for emotion '{best_emotion}':**")
+    top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion].sort_values(
+        by='Post-Interaktionsrate', ascending=False
+    ).head(3)
+    if not top_emotion_posts.empty:
+        for _, row in top_emotion_posts.iterrows():
+            st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
+            st.write(row['Text'])
+            st.write("---")
+    else:
+        st.write("No posts found for this emotion.")
+
+    # For the best politikfeld:
+    st.markdown(f"**Top posts for politikfeld '{best_politikfeld}':**")
+    top_politikfeld_posts = filtered_data[filtered_data['politikfeld'] == best_politikfeld].sort_values(
+        by='Post-Interaktionsrate', ascending=False
+    ).head(3)
+    if not top_politikfeld_posts.empty:
+        for _, row in top_politikfeld_posts.iterrows():
+            st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
+            st.write(row['Text'])
+            st.write("---")
+    else:
+        st.write("No posts found for this politikfeld.")
+else:
+    st.info("The 'Post-Interaktionsrate' column is missing, so example posts cannot be shown.")
+#END TEST2
 
 # Debugging: Show the count of filtered rows
 st.write("Number of rows after filtering:", len(filtered_data))
