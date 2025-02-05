@@ -95,6 +95,10 @@ if phrase:
     filtered_data = filtered_data[filtered_data['Text'].str.contains(phrase, case=False, na=False)]
 
 #TEST BELOW
+# Convert 'Post-Interaktionsrate' to numeric, forcing non-numeric values to become NaN
+if 'Post-Interaktionsrate' in filtered_data.columns:
+    filtered_data['Post-Interaktionsrate'] = pd.to_numeric(filtered_data['Post-Interaktionsrate'], errors='coerce')
+
 # Determine best performing sentiment, emotion, and politikfeld based on average post interaction rate
 if not filtered_data.empty:
     if 'Post-Interaktionsrate' in filtered_data.columns:
