@@ -185,10 +185,10 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         for _, row in top_sentiment_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
             st.write(row['Text'])
-            st.write("---")
+            
     else:
         st.write("No posts found for this sentiment.")
-
+    st.write("---")
     # For the best emotion:
     st.markdown(f"**Top posts für Emotion '{best_emotion}':**")
     top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion].sort_values(
@@ -198,9 +198,10 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         for _, row in top_emotion_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
             st.write(row['Text'])
-            st.write("---")
+            
     else:
         st.write("No posts found for this emotion.")
+    st.write("---")
 
     # For the best politikfeld:
     st.markdown(f"**Top posts für Politikfeld '{best_politikfeld}':**")
@@ -211,9 +212,10 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         for _, row in top_politikfeld_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
             st.write(row['Text'])
-            st.write("---")
+            
     else:
         st.write("No posts found for this politikfeld.")
+    st.write("---")
 else:
     st.info("The 'Post-Interaktionsrate' column is missing, so example posts cannot be shown.")
 #END TEST2
