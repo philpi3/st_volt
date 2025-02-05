@@ -190,30 +190,33 @@ top_politikfeld_posts = filtered_data[filtered_data['politikfeld'] == best_polit
 cols = st.columns(3)
 
 with cols[0]:
-    st.markdown(f"### Top posts for sentiment '{best_sentiment}'")
+    st.markdown(f"### Top posts für Sentiment '{best_sentiment}'")
     if not top_sentiment_posts.empty:
         for _, row in top_sentiment_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
+            st.markdown(f"*Anzahl Likes:* {row['Anzahl Likes']:.2f}")
             st.write(row['Text'])
             st.write("---")
     else:
         st.write("No posts found for this sentiment.")
 
 with cols[1]:
-    st.markdown(f"### Top posts for emotion '{best_emotion}'")
+    st.markdown(f"### Top posts für Emotion '{best_emotion}'")
     if not top_emotion_posts.empty:
         for _, row in top_emotion_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
+            st.markdown(f"*Anzahl Likes:* {row['Anzahl Likes']:.2f}")
             st.write(row['Text'])
             st.write("---")
     else:
         st.write("No posts found for this emotion.")
 
 with cols[2]:
-    st.markdown(f"### Top posts for politikfeld '{best_politikfeld}'")
+    st.markdown(f"### Top posts für Politikfeld '{best_politikfeld}'")
     if not top_politikfeld_posts.empty:
         for _, row in top_politikfeld_posts.iterrows():
             st.markdown(f"*Interaction Rate:* {row['Post-Interaktionsrate']:.2f}")
+            st.markdown(f"*Anzahl Likes:* {row['Anzahl Likes']:.2f}")
             st.write(row['Text'])
             st.write("---")
     else:
