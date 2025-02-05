@@ -22,7 +22,7 @@ data.columns = data.columns.str.strip()
 data['Anzahl Likes'] = data['Anzahl Likes'].str.replace(',', '').astype(float)
 data['Anzahl Kommentare'] = data['Anzahl Kommentare'].str.replace(',', '').astype(float)
 data['Reaktionen, Kommentare & Shares'] = data['Reaktionen, Kommentare & Shares'].str.replace(',', '').astype(float)
-data['Post-Interaktionsrate'] = data['Post-Interaktionsrate'].str.replace(',', '').astype(float)
+data['Post-Interaktionsrate'] = data['Post-Interaktionsrate'].astype(float)
 
 # Convert 'Datum' to datetime
 data['Datum'] = data['Datum'].str.replace(',', ' ')
@@ -104,8 +104,7 @@ if phrase:
 #TEST BELOW
 # Ensure that 'Post-Interaktionsrate' is numeric
 if 'Post-Interaktionsrate' in filtered_data.columns:
-    # If there is a percent sign or similar formatting, remove it first:
-    # filtered_data['Post-Interaktionsrate'] = filtered_data['Post-Interaktionsrate'].str.rstrip('%')
+    
     filtered_data['Post-Interaktionsrate'] = pd.to_numeric(filtered_data['Post-Interaktionsrate'], errors='coerce')
     
     # Calculate the average interaction rate per category
@@ -156,7 +155,8 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
 
         st.markdown(
             f"""
-            ### Best Performing Categories
+            ### Zusammenfassung:
+            Dieses Textfeld zeigt automatisch die best performenden Sentimente, Emotionen und Politikfelder in der über die Filter auf der Seitenleiste ausgewählten Gruppen / Parteien.
             - **Sentiment:** {best_sentiment} (Avg. Interaction Rate: {best_sentiment_rate:.2f})
             - **Emotion:** {best_emotion} (Avg. Interaction Rate: {best_emotion_rate:.2f})
             - **Politikfeld:** {best_politikfeld} (Avg. Interaction Rate: {best_politikfeld_rate:.2f})
