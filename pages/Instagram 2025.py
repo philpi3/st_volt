@@ -22,7 +22,7 @@ data.columns = data.columns.str.strip()
 data['Anzahl Likes'] = data['Anzahl Likes'].str.replace(',', '').astype(float)
 data['Anzahl Kommentare'] = data['Anzahl Kommentare'].str.replace(',', '').astype(float)
 data['Reaktionen, Kommentare & Shares'] = data['Reaktionen, Kommentare & Shares'].str.replace(',', '').astype(float)
-data['Post-Interaktionsrate'] = data['Post-Interaktionsrate'].astype(float)
+data['Post-Interaktionsrate'] = data['Post-Interaktionsrate'].str.replace(',', '.').astype(float)
 
 # Convert 'Datum' to datetime
 data['Datum'] = data['Datum'].str.replace(',', ' ')
