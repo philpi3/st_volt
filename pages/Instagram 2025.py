@@ -94,33 +94,7 @@ filtered_data = data[
 if phrase:
     filtered_data = filtered_data[filtered_data['Text'].str.contains(phrase, case=False, na=False)]
 
-#TEST BELOW
-# Determine best performing sentiment, emotion, and politikfeld based on average post interaction rate
-if not filtered_data.empty:
-    if 'Post-Interaktionsrate' in filtered_data.columns:
-        # Calculate the average interaction rate per category
-        sentiment_perf = filtered_data.groupby('sentiment')['Post-Interaktionsrate'].mean()
-        emotion_perf = filtered_data.groupby('emotion')['Post-Interaktionsrate'].mean()
-        politikfeld_perf = filtered_data.groupby('politikfeld')['Post-Interaktionsrate'].mean()
 
-        # Identify the best performing category for each type
-        best_sentiment = sentiment_perf.idxmax()
-        best_emotion = emotion_perf.idxmax()
-        best_politikfeld = politikfeld_perf.idxmax()
-
-        st.markdown(
-            f"""
-            ### Best Performing Categories
-            - **Sentiment:** {best_sentiment} (Avg. Interaction Rate: {sentiment_perf[best_sentiment]:.2f})
-            - **Emotion:** {best_emotion} (Avg. Interaction Rate: {emotion_perf[best_emotion]:.2f})
-            - **Politikfeld:** {best_politikfeld} (Avg. Interaction Rate: {politikfeld_perf[best_politikfeld]:.2f})
-            """
-        )
-    else:
-        st.info("The 'Post-Interaktionsrate' column is not available to calculate performance metrics.")
-else:
-    st.info("No data available for the selected filters.")
-#TEST ABOVE
 
 # Debugging: Show the count of filtered rows
 st.write("Number of rows after filtering:", len(filtered_data))
