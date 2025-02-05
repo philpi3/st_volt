@@ -114,9 +114,9 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
     politikfeld_perf = filtered_data.groupby('politikfeld')['Post-Interaktionsrate'].mean()
 
     # Debug: print the indexes so we can see what keys are available
-    st.write("Sentiment groups:", sentiment_perf.index.tolist())
-    st.write("Emotion groups:", emotion_perf.index.tolist())
-    st.write("Politikfeld groups:", politikfeld_perf.index.tolist())
+    #st.write("Sentiment groups:", sentiment_perf.index.tolist())
+    #st.write("Emotion groups:", emotion_perf.index.tolist())
+    #st.write("Politikfeld groups:", politikfeld_perf.index.tolist())
 
     # Check if the series are non-empty before proceeding
     if not sentiment_perf.empty and not emotion_perf.empty and not politikfeld_perf.empty:
