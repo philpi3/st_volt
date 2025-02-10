@@ -1,156 +1,100 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 st.set_page_config(layout="wide")
 
-# Load the CSV file
-
+# --- Load and Preprocess Data ---
 data = pd.read_csv("pages/data/Jan25-04.02.csv")
 
-# Normalize the sentiment and politikfeld columns by stripping extra quotes and whitespace
+# Normalize columns by stripping extra quotes and whitespace
 data['sentiment'] = data['sentiment'].str.strip(" '")
 data['politikfeld'] = data['politikfeld'].str.strip(" '")
 data['emotion'] = data['emotion'].str.strip(" '")
-
-
-# Ensure column names are consistent
 data.columns = data.columns.str.strip()
 
-# Preprocess data: convert strings with commas to numeric
+# Convert columns to numeric (removing commas)
 data['Anzahl Likes'] = data['Anzahl Likes'].str.replace(',', '').astype(float)
 data['Anzahl Kommentare'] = data['Anzahl Kommentare'].str.replace(',', '').astype(float)
 data['Reaktionen, Kommentare & Shares'] = data['Reaktionen, Kommentare & Shares'].str.replace(',', '').astype(float)
 data['Post-Interaktionsrate'] = data['Post-Interaktionsrate'].str.replace(',', '.').astype(float)
 
-# Convert 'Datum' to datetime
+# Convert 'Datum' to datetime (replace commas with space)
 data['Datum'] = data['Datum'].str.replace(',', ' ')
-
 data['Datum'] = pd.to_datetime(data['Datum'], format='%d.%m.%y %H:%M', errors='coerce')
 
-# Streamlit app title
-st.title('Social Media Post Analysis')
-
-# Sidebar for filtering options
+# --- Sidebar Filters ---
 st.sidebar.title("Filter Options")
 
-# Multiselect for groups with an 'All' option
+# Group filter
 groups = data['Gruppe'].unique()
 groups_list = st.sidebar.multiselect("Select Group", options=['All'] + list(groups), default=['All'])
+selected_groups = groups if 'All' in groups_list else groups_list
 
-# Determine the selected groups
-if 'All' in groups_list:
-    selected_groups = groups
-else:
-    selected_groups = groups_list
-
-# Multiselect for profiles with an 'All' option
+# Profile filter
 profiles = data['Profil'].unique()
 profiles_list = st.sidebar.multiselect("Select Profiles", options=['All'] + list(profiles), default=['All'])
+selected_profiles = profiles if 'All' in profiles_list else profiles_list
 
-# Determine the selected profiles
-if 'All' in profiles_list:
-    selected_profiles = profiles
-else:
-    selected_profiles = profiles_list
-
-# Multiselect for sentiments with an 'All' option
+# Sentiment filter
 sentiments = data['sentiment'].unique()
 sentiments_list = st.sidebar.multiselect("Select Sentiments", options=['All'] + list(sentiments), default=['All'])
+selected_sentiments = sentiments if 'All' in sentiments_list else sentiments_list
 
-# Determine the selected sentiments
-if 'All' in sentiments_list:
-    selected_sentiments = sentiments
-else:
-    selected_sentiments = sentiments_list
-
-# Multiselect for politikfeld with an 'All' option
+# Politikfeld filter
 politikfelds = data['politikfeld'].unique()
 politikfeld_list = st.sidebar.multiselect("Select Politikfeld", options=['All'] + list(politikfelds), default=['All'])
+selected_politikfeld = politikfelds if 'All' in politikfeld_list else politikfeld_list
 
-# Determine the selected politikfelds
-if 'All' in politikfeld_list:
-    selected_politikfeld = politikfelds
-else:
-    selected_politikfeld = politikfeld_list
-
-# Multiselect for emotion with an 'All' option
+# Emotion filter
 emotions = data['emotion'].unique()
 emotions_list = st.sidebar.multiselect("Select Emotions", options=['All'] + list(emotions), default=['All'])
+selected_emotions = emotions if 'All' in emotions_list else emotions_list
 
-# Determine the selected emotions
-if 'All' in emotions_list:
-    selected_emotions = emotions
-else:
-    selected_emotions = emotions_list
-
-# Text input for filtering by phrase in 'Text' column
+# Text search filter
 phrase = st.sidebar.text_input("Enter a phrase to search in Text", value="")
 
-# Filter data based on sidebar selections
+# Filter the data based on selections
 filtered_data = data[
-    (data['Profil'].isin(selected_profiles)) & 
+    (data['Profil'].isin(selected_profiles)) &
     (data['sentiment'].isin(selected_sentiments)) &
     (data['politikfeld'].isin(selected_politikfeld)) &
     (data['emotion'].isin(selected_emotions)) &
     (data['Gruppe'].isin(selected_groups))
 ]
 
-# Apply text filter if a phrase is entered
 if phrase:
     filtered_data = filtered_data[filtered_data['Text'].str.contains(phrase, case=False, na=False)]
 
-#TEST BELOW
-# Ensure that 'Post-Interaktionsrate' is numeric
+# --- Performance Metrics (existing logic) ---
 if 'Post-Interaktionsrate' in filtered_data.columns:
-    
     filtered_data['Post-Interaktionsrate'] = pd.to_numeric(filtered_data['Post-Interaktionsrate'], errors='coerce')
-    
-    # Calculate the average interaction rate per category
     sentiment_perf = filtered_data.groupby('sentiment')['Post-Interaktionsrate'].mean()
     emotion_perf = filtered_data.groupby('emotion')['Post-Interaktionsrate'].mean()
     politikfeld_perf = filtered_data.groupby('politikfeld')['Post-Interaktionsrate'].mean()
 
-    # Debug: print the indexes so we can see what keys are available
-    #st.write("Sentiment groups:", sentiment_perf.index.tolist())
-    #st.write("Emotion groups:", emotion_perf.index.tolist())
-    #st.write("Politikfeld groups:", politikfeld_perf.index.tolist())
-
-    # Check if the series are non-empty before proceeding
     if not sentiment_perf.empty and not emotion_perf.empty and not politikfeld_perf.empty:
         try:
             best_sentiment = sentiment_perf.idxmax()
-            # Check that the key exists before indexing
-            if best_sentiment in sentiment_perf.index:
-                best_sentiment_rate = sentiment_perf.loc[best_sentiment]
-            else:
-                best_sentiment_rate = float('nan')
+            best_sentiment_rate = sentiment_perf.loc[best_sentiment]
         except Exception as e:
             best_sentiment = "N/A"
             best_sentiment_rate = 0
             st.error(f"Error determining best sentiment: {e}")
-
         try:
             best_emotion = emotion_perf.idxmax()
-            if best_emotion in emotion_perf.index:
-                best_emotion_rate = emotion_perf.loc[best_emotion]
-            else:
-                best_emotion_rate = float('nan')
+            best_emotion_rate = emotion_perf.loc[best_emotion]
         except Exception as e:
             best_emotion = "N/A"
             best_emotion_rate = 0
             st.error(f"Error determining best emotion: {e}")
-
         try:
             best_politikfeld = politikfeld_perf.idxmax()
-            if best_politikfeld in politikfeld_perf.index:
-                best_politikfeld_rate = politikfeld_perf.loc[best_politikfeld]
-            else:
-                best_politikfeld_rate = float('nan')
+            best_politikfeld_rate = politikfeld_perf.loc[best_politikfeld]
         except Exception as e:
             best_politikfeld = "N/A"
             best_politikfeld_rate = 0
@@ -159,8 +103,6 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         st.markdown(
             f"""
             ### Zusammenfassung:
-            Die folgenden Textfelder zeigen automatisch die best performenden Sentimente, Emotionen und Politikfelder in der über die Filter auf der Seitenleiste ausgewählten Gruppen / Parteien. 
-            Danach folgen jeweils die drei Posts mit der höchsten Interaktionsrate in den jeweiligen Kategorien. Für einen kompletten Überblick, über die Posts in der gefilterten Gruppe, können die generierten Tabellen weiter unten genutzt werden.
             - **Sentiment:** {best_sentiment} (Avg. Interaction Rate: {best_sentiment_rate:.2f})
             - **Emotion:** {best_emotion} (Avg. Interaction Rate: {best_emotion_rate:.2f})
             - **Politikfeld:** {best_politikfeld} (Avg. Interaction Rate: {best_politikfeld_rate:.2f})
@@ -170,18 +112,11 @@ if 'Post-Interaktionsrate' in filtered_data.columns:
         st.info("Not enough data to compute performance metrics for one or more categories.")
 else:
     st.info("The 'Post-Interaktionsrate' column is not available to calculate performance metrics.")
-#TEST ABOVE
 
-#TEST2
-# First, compute and clean the best-performing categories as before
-# (Assuming best_sentiment, best_emotion, best_politikfeld have been computed,
-#  and that filtered_data has been cleaned accordingly)
-
-# For example, ensure that 'Post-Interaktionsrate' is numeric:
+# --- Top Posts Display (existing logic) ---
 if 'Post-Interaktionsrate' in filtered_data.columns:
     filtered_data['Post-Interaktionsrate'] = pd.to_numeric(filtered_data['Post-Interaktionsrate'], errors='coerce')
 
-# Compute the top posts for each category
 top_sentiment_posts = filtered_data[filtered_data['sentiment'] == best_sentiment] \
     .sort_values(by='Post-Interaktionsrate', ascending=False).head(3)
 top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion] \
@@ -189,9 +124,7 @@ top_emotion_posts = filtered_data[filtered_data['emotion'] == best_emotion] \
 top_politikfeld_posts = filtered_data[filtered_data['politikfeld'] == best_politikfeld] \
     .sort_values(by='Post-Interaktionsrate', ascending=False).head(3)
 
-# Create three columns to display the posts side by side
 cols = st.columns(3)
-
 with cols[0]:
     st.markdown(f"### Top posts für Sentiment '{best_sentiment}'")
     if not top_sentiment_posts.empty:
@@ -225,194 +158,159 @@ with cols[2]:
     else:
         st.write("No posts found for this politikfeld.")
 
-#END TEST2
-
-# Debugging: Show the count of filtered rows
 st.write("Number of rows after filtering:", len(filtered_data))
-
-# Ensure Datum is correctly parsed and contains no NaT values
 if filtered_data['Datum'].isna().sum() > 0:
     st.write("Warning: Some 'Datum' values could not be parsed. They are excluded from plots.")
     filtered_data = filtered_data.dropna(subset=['Datum'])
 
+# --- Create Aggregated Daily Data for Plotly Charts ---
+# Convert Datum to datetime (if not already) and create a 'Date' column for daily aggregation
+filtered_data['Datum'] = pd.to_datetime(filtered_data['Datum'])
+daily_data = filtered_data.copy()
+daily_data['Date'] = daily_data['Datum'].dt.date
 
+# Aggregate daily metrics (using the mean for demonstration)
+daily_data = daily_data.groupby('Date').agg({
+    'Anzahl Likes': 'mean',
+    'Anzahl Kommentare': 'mean',
+    'Reaktionen, Kommentare & Shares': 'mean',
+    'Post-Interaktionsrate': 'mean'
+}).reset_index()
 
+# Optional: Create a rolling average for smoothing (e.g., 7-day window)
+daily_data['Likes_Rolling'] = daily_data['Anzahl Likes'].rolling(window=7).mean()
 
+# --- Plotly Visualizations ---
 st.write("## Visualizations with Plotly")
 
-# ---------- 1. Time Series Plots ----------
-
-# Likes Over Time (Line Chart with markers)
-if not filtered_data.empty and 'Datum' in filtered_data.columns:
+# 1. Daily Average Likes Over Time (Line Chart without markers)
+if not daily_data.empty:
     fig_likes = px.line(
-        filtered_data,
-        x='Datum',
+        daily_data,
+        x='Date',
         y='Anzahl Likes',
-        title='Likes Over Time',
-        markers=True,
-        labels={'Datum': 'Date', 'Anzahl Likes': 'Likes'}
+        title='Daily Average Likes Over Time',
+        labels={'Date': 'Date', 'Anzahl Likes': 'Average Likes'}
     )
     st.plotly_chart(fig_likes, use_container_width=True)
 
-# Comments Over Time (Line Chart with markers)
-if not filtered_data.empty and 'Datum' in filtered_data.columns:
+# 2. Daily Average Comments Over Time (Line Chart)
+if not daily_data.empty:
     fig_comments = px.line(
-        filtered_data,
-        x='Datum',
+        daily_data,
+        x='Date',
         y='Anzahl Kommentare',
-        title='Comments Over Time',
-        markers=True,
-        labels={'Datum': 'Date', 'Anzahl Kommentare': 'Comments'}
+        title='Daily Average Comments Over Time',
+        labels={'Date': 'Date', 'Anzahl Kommentare': 'Average Comments'}
     )
     st.plotly_chart(fig_comments, use_container_width=True)
 
-# ---------- 2. Dual-Axis Chart ----------
-
-# Combined Likes and Comments Over Time using dual y-axes
-if not filtered_data.empty and 'Datum' in filtered_data.columns:
+# 3. Dual-Axis Chart for Daily Average Likes and Comments
+if not daily_data.empty:
     fig_dual = make_subplots(specs=[[{"secondary_y": True}]])
-    
-    # Trace for Likes
     fig_dual.add_trace(
         go.Scatter(
-            x=filtered_data['Datum'],
-            y=filtered_data['Anzahl Likes'],
+            x=daily_data['Date'],
+            y=daily_data['Anzahl Likes'],
             name="Likes",
-            mode="lines+markers",
-            line=dict(color='blue')
+            mode="lines",
+            line=dict(color='blue', width=2),
+            opacity=0.8
         ),
-        secondary_y=False,
+        secondary_y=False
     )
-    
-    # Trace for Comments
     fig_dual.add_trace(
         go.Scatter(
-            x=filtered_data['Datum'],
-            y=filtered_data['Anzahl Kommentare'],
+            x=daily_data['Date'],
+            y=daily_data['Anzahl Kommentare'],
             name="Comments",
-            mode="lines+markers",
-            line=dict(color='red')
+            mode="lines",
+            line=dict(color='red', width=2),
+            opacity=0.8
         ),
-        secondary_y=True,
+        secondary_y=True
     )
-    
-    # Update layout for dual axes
     fig_dual.update_layout(
-        title_text="Likes and Comments Over Time",
+        title_text="Daily Average Likes and Comments Over Time",
         xaxis_title="Date",
         legend=dict(orientation="h", x=0, y=-0.2)
     )
-    fig_dual.update_yaxes(title_text="Likes", secondary_y=False)
-    fig_dual.update_yaxes(title_text="Comments", secondary_y=True)
-    
+    fig_dual.update_yaxes(title_text="Average Likes", secondary_y=False)
+    fig_dual.update_yaxes(title_text="Average Comments", secondary_y=True)
     st.plotly_chart(fig_dual, use_container_width=True)
 
-# ---------- 3. Categorical Visualizations ----------
+# 4. Rolling Average of Likes (7-Day Rolling Average)
+if not daily_data.empty:
+    fig_roll = px.line(
+        daily_data,
+        x='Date',
+        y='Likes_Rolling',
+        title='7-Day Rolling Average of Likes',
+        labels={'Date': 'Date', 'Likes_Rolling': '7-Day Avg Likes'}
+    )
+    st.plotly_chart(fig_roll, use_container_width=True)
 
-# Sentiment Distribution Bar Chart
+# 5. Likes Over Time by Gruppe (Raw data; color-coded by Gruppe)
+if not filtered_data.empty:
+    fig_group = px.line(
+        filtered_data,
+        x='Datum',
+        y='Anzahl Likes',
+        color='Gruppe',
+        title='Likes Over Time by Gruppe',
+        labels={'Datum': 'Date', 'Anzahl Likes': 'Likes'}
+    )
+    st.plotly_chart(fig_group, use_container_width=True)
+
+# 6. Sentiment Distribution (Bar Chart)
 if 'sentiment' in filtered_data.columns:
     sentiment_counts = filtered_data['sentiment'].value_counts().reset_index()
     sentiment_counts.columns = ['sentiment', 'count']
-    
     fig_sentiment = px.bar(
         sentiment_counts,
         x='sentiment',
         y='count',
         title="Sentiment Distribution",
         labels={'sentiment': 'Sentiment', 'count': 'Number of Posts'},
-        color='sentiment'  # automatic color assignment
+        color='sentiment'
     )
     st.plotly_chart(fig_sentiment, use_container_width=True)
 
-# ---------- 4. Average Engagement by Sentiment ----------
-
-# Calculate averages
-if 'sentiment' in filtered_data.columns:
-    avg_likes = filtered_data.groupby('sentiment')['Anzahl Likes'].mean().reset_index()
-    avg_comments = filtered_data.groupby('sentiment')['Anzahl Kommentare'].mean().reset_index()
-
-    # Create subplots for a side-by-side grouped bar chart
-    fig_engagement = make_subplots(
-        rows=1,
-        cols=2,
-        subplot_titles=("Average Likes by Sentiment", "Average Comments by Sentiment")
-    )
-    
-    fig_engagement.add_trace(
-        go.Bar(
-            x=avg_likes['sentiment'],
-            y=avg_likes['Anzahl Likes'],
-            marker_color='blue',
-            name="Likes"
-        ),
-        row=1, col=1
-    )
-    
-    fig_engagement.add_trace(
-        go.Bar(
-            x=avg_comments['sentiment'],
-            y=avg_comments['Anzahl Kommentare'],
-            marker_color='red',
-            name="Comments"
-        ),
-        row=1, col=2
-    )
-    
-    # Update layout
-    fig_engagement.update_layout(
-        title_text="Average Engagement by Sentiment",
-        showlegend=False
-    )
-    
-    # Set individual axis titles
-    fig_engagement.update_xaxes(title_text="Sentiment", row=1, col=1)
-    fig_engagement.update_yaxes(title_text="Average Likes", row=1, col=1)
-    fig_engagement.update_xaxes(title_text="Sentiment", row=1, col=2)
-    fig_engagement.update_yaxes(title_text="Average Comments", row=1, col=2)
-    
-    st.plotly_chart(fig_engagement, use_container_width=True)
-
-# Display filtered data
-st.write(f"## Filtered Data for Selected Profiles, Sentiments, Politikfeld, and Emotions")
-st.dataframe(filtered_data)
-
-# Sidebar selection for word cloud type
+# --- Word Cloud Section (existing logic) ---
 st.sidebar.title("Word Cloud Options")
 wordcloud_option = st.sidebar.selectbox("Select Word Cloud Type", options=['sentiment', 'emotion', 'politikfeld'])
 
-# Word Cloud for Text Analysis
 st.write("### Word Cloud for Text Analysis by Selected Type")
-
-# Generate and display word clouds based on the selected option
 if wordcloud_option == 'sentiment':
     for sentiment in filtered_data['sentiment'].unique():
         sentiment_text = " ".join(filtered_data[filtered_data['sentiment'] == sentiment]['Text'])
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate(sentiment_text)
-        
         st.write(f"#### Word Cloud for {sentiment} Sentiment")
         plt.figure(figsize=(10, 5))
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
         st.pyplot(plt)
-        
 elif wordcloud_option == 'emotion':
     for emotion in filtered_data['emotion'].unique():
         emotion_text = " ".join(filtered_data[filtered_data['emotion'] == emotion]['Text'])
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate(emotion_text)
-        
         st.write(f"#### Word Cloud for {emotion} Emotion")
         plt.figure(figsize=(10, 5))
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
         st.pyplot(plt)
-        
 elif wordcloud_option == 'politikfeld':
     for politikfeld in filtered_data['politikfeld'].unique():
         politikfeld_text = " ".join(filtered_data[filtered_data['politikfeld'] == politikfeld]['Text'])
         wordcloud = WordCloud(width=800, height=400, background_color='white').generate(politikfeld_text)
-        
         st.write(f"#### Word Cloud for {politikfeld} Politikfeld")
         plt.figure(figsize=(10, 5))
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis('off')
         st.pyplot(plt)
+
+# --- Data Preview ---
+st.write("## Data Preview")
+st.dataframe(data.head())
+st.write("## Filtered Data for Selected Profiles, Sentiments, Politikfeld, and Emotions")
+st.dataframe(filtered_data)
