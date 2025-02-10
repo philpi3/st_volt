@@ -252,17 +252,30 @@ if not daily_data.empty:
     )
     st.plotly_chart(fig_roll, use_container_width=True)
 
-# 5. Likes Over Time by Gruppe (Raw data; color-coded by Gruppe)
+# 5. Likes Over Time by Gruppe (Aggregated by Date)
 if not filtered_data.empty:
+    # Create a copy and ensure 'Datum' is datetime
+    group_data = filtered_data.copy()
+    group_data['Datum'] = pd.to_datetime(group_data['Datum'])
+    
+    # Create a new column for just the date (without time)
+    group_data['Date'] = group_data['Datum'].dt.date
+    
+    # Aggregate the likes by Date and Gruppe. 
+    # You can choose 'mean', 'sum', or another aggregation based on your needs.
+    group_data_agg = group_data.groupby(['Date', 'Gruppe'], as_index=False)['Anzahl Likes'].mean()
+    
+    # Plot the aggregated data with Plotly Express
     fig_group = px.line(
-        filtered_data,
-        x='Datum',
+        group_data_agg,
+        x='Date',
         y='Anzahl Likes',
         color='Gruppe',
-        title='Likes Over Time by Gruppe',
-        labels={'Datum': 'Date', 'Anzahl Likes': 'Likes'}
+        title='Daily Average Likes Over Time by Gruppe',
+        labels={'Date': 'Date', 'Anzahl Likes': 'Average Likes'}
     )
     st.plotly_chart(fig_group, use_container_width=True)
+
 
 # 6. Sentiment Distribution (Bar Chart)
 if 'sentiment' in filtered_data.columns:
