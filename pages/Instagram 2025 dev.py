@@ -70,7 +70,7 @@ filtered_data = data[
 if phrase:
     filtered_data = filtered_data[filtered_data['Text'].str.contains(phrase, case=False, na=False)]
 
-st.markdown("WORK IN PROGRESS - Hier teste ich neue Visualisierungen/Plots/Wordcloudass/Maps mit Plotly, anstelle der weniger leistungsstarken streamlit lösung auf der Instagram 2025 Seite. Wenn ich hier fertig bin, wird plotly auch auf der Hauptseite eingebunden.")
+st.markdown("WORK IN PROGRESS - Hier teste ich neue Visualisierungen/Plots/Wordclouds/Maps mit Plotly, anstelle der weniger leistungsstarken streamlit lösung auf der Instagram 2025 Seite. Wenn ich hier fertig bin, wird plotly auch auf der Hauptseite eingebunden.")
 
 # --- Performance Metrics (existing logic) ---
 if 'Post-Interaktionsrate' in filtered_data.columns:
