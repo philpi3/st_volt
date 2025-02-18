@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(layout="wide")
 
 # --- Load and Preprocess Data ---
-data = pd.read_csv("pages/data/Jan25-11.02.csv")
+data = pd.read_csv("pages/data/Jan25-18.02.csv")
 
 # Normalize columns by stripping extra quotes and whitespace
 data['sentiment'] = data['sentiment'].str.strip(" '")

@@ -7,7 +7,7 @@ st.set_page_config(layout="wide")
 
 # Load the CSV file
 
-data = pd.read_csv("pages/data/Jan25-11.02.csv")
+data = pd.read_csv("pages/data/Jan25-18.02.csv")
 
 # Normalize the sentiment and politikfeld columns by stripping extra quotes and whitespace
 data['sentiment'] = data['sentiment'].str.strip(" '")
